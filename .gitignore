@@ -2,3 +2,5 @@
 __pycache__
 model_cache
 vector_index
+.cache
+gguf_models

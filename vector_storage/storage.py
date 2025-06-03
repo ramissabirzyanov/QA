@@ -13,7 +13,7 @@ class VectorStorage:
         self.data_dir = settings.DOCS_DIR
         self.model = settings.MODEL_NAME
         self.index_path = settings.FAISS_INDEX_PATH
-    
+
     def vectorise(self) -> None:
         all_chunks = []
         for filename in os.listdir(self.data_dir):
@@ -31,7 +31,7 @@ class VectorStorage:
         logger.info(f"Количество чанков: {len(all_chunks)}")
         for i, doc in enumerate(all_chunks[:37:10]):
             filename = doc.metadata.get("source")
-            logger.info(   
+            logger.info(
                 f"{i+1}. Файл: {filename}\n"
                 f"Текст: {doc.page_content[:20]}..."
             )

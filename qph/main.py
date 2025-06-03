@@ -1,17 +1,16 @@
 import os
 
-# import torch
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains.retrieval_qa.base import RetrievalQA
-# from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-# from langchain_huggingface import HuggingFacePipeline
-from langchain_ollama import OllamaLLM
+# from langchain_ollama import OllamaLLM
+from langchain_community.llms.llamacpp import LlamaCpp
 
 from vector_storage.storage import VectorStorage
 from qph.settings import settings
 from qph.logger import logger
 from langchain.prompts import PromptTemplate
+
 
 def main():
     if not os.path.exists(f"{settings.FAISS_INDEX_PATH}"):
@@ -20,15 +19,15 @@ def main():
         storage.vectorise()
 
     PROMPT = PromptTemplate(
-    input_variables=["context", "question"],
-    template="""
-        Ты — интеллектуальный помощник, который отвечает на вопросы, используя предоставленный контекст.
-        Контекст:
-        {context}
-        Вопрос: {question}
-        Ответ на только русском языке:
-        """
-        )
+        input_variables=["context", "question"],
+        template="""
+            Ты — интеллектуальный помощник, который отвечает на вопросы, используя предоставленный контекст.
+            Контекст:
+            {context}
+            Вопрос: {question}
+            Ответ только на русском языке:
+            """
+    )
 
     embeddings = HuggingFaceEmbeddings(model_name=settings.MODEL_NAME)
     vectorstorage = FAISS.load_local(
@@ -37,11 +36,21 @@ def main():
         allow_dangerous_deserialization=True
     )
 
-    llm = OllamaLLM(
-        model="mistral",
+    # llm = OllamaLLM(
+    #     model="mistral",
+    #     temperature=0.5,
+    #     num_predict=150,
+    #     verbose=False
+    # )
+
+    llm = LlamaCpp(
+        model_path="gguf_models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
+        n_ctx=1024,
         temperature=0.5,
-        num_predict=256,
-        verbose=True
+        verbose=False,
+        n_threads=8,
+        n_gpu_layers=32,
+        n_batch=128
     )
 
     qa = RetrievalQA.from_chain_type(

@@ -10,7 +10,7 @@ from qph.settings import settings
 from qph.logger import logger
 
 
-class DocumentReaderBase(ABC):
+class BaseDocument(ABC):
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.chunk_size = settings.CHUNK_SIZE
@@ -29,7 +29,7 @@ class DocumentReaderBase(ABC):
         return splitter.split_documents(docs)
 
 
-class DOCX_Reader(DocumentReaderBase):
+class DOCX_Reader(BaseDocument):
     def read_document(self) -> list[Document]:
         logger.info(f"Чтение DOCX: {self.file_path}")
         loader = Docx2txtLoader(self.file_path)
@@ -39,7 +39,7 @@ class DOCX_Reader(DocumentReaderBase):
         return docs
 
 
-class PDF_Reader(DocumentReaderBase):
+class PDF_Reader(BaseDocument):
     def read_document(self) -> list[Document]:
 
         logger.info(f"Чтение PDF: {self.file_path}")
@@ -49,10 +49,10 @@ class PDF_Reader(DocumentReaderBase):
             doc.metadata["source"] = self.file_path
         return docs
 
+
 def get_reader(file_path: str):
     _, ext = os.path.splitext(file_path)
     ext = ext.lower()
-    
     if ext == ".pdf":
         return PDF_Reader(file_path)
     elif ext == ".docx":
