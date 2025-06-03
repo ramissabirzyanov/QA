@@ -59,4 +59,3 @@ def get_reader(file_path: str):
         return DOCX_Reader(file_path)
     else:
         raise ValueError(f"Unsupported file extension: {ext}")
-
