@@ -1,14 +1,10 @@
-import os
-
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.llms.llamacpp import LlamaCpp
 from langchain.prompts import PromptTemplate
 
-from vector_storage.storage import VectorStorage
-from config.settings import document_settings, llm_settings
-from config.logger import logger
+from config.settings import llm_settings, document_settings
 
 
 PROMPT = PromptTemplate(
@@ -50,32 +46,3 @@ def get_chain(prompt=PROMPT):
     parser = StrOutputParser()
     chain = prompt | llm | parser
     return chain
-
-
-def main():
-    if not os.path.exists(f"{document_settings.FAISS_INDEX_PATH}"):
-        logger.info("Хранилища нет — создаем...")
-        storage = VectorStorage()
-        storage.vectorise()
-
-    retriever = get_retriever()
-    chain = get_chain()
-    try:
-        while True:
-            query = input("\nВаш вопрос: ")
-            if not query:
-                break
-            docs = retriever.invoke(query)
-            context = "\n\n".join([doc.page_content for doc in docs])
-            result = chain.invoke({"context": context, "question": query})
-            print("\nОтвет:", result)
-            logger.info("\nНайденные документы:")
-            for doc in docs:
-                source = doc.metadata.get("source")
-                logger.info(f"[{source}] {doc.page_content[:50]}...")
-    except KeyboardInterrupt:
-        print("\nBYE", flush=True)
-
-
-if __name__ == "__main__":
-    main()
