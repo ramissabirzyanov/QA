@@ -6,25 +6,27 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import PyMuPDFLoader
-from qph.settings import settings
-from qph.logger import logger
+from config.settings import document_settings
+from config.logger import logger
 
 
 class BaseDocument(ABC):
     def __init__(self, file_path: str):
         self.file_path = file_path
-        self.chunk_size = settings.CHUNK_SIZE
-        self.overlap = settings.CHUNK_OVERLAP
 
     @abstractmethod
     def read_document(self) -> list[Document]:
         pass
 
-    def get_chunks(self) -> list[Document]:
+    def get_chunks(
+        self,
+        chunk_size=document_settings.CHUNK_SIZE,
+        overlap=document_settings.CHUNK_OVERLAP
+    ) -> list[Document]:
         docs = self.read_document()
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.chunk_size,
-            chunk_overlap=self.overlap
+            chunk_size=chunk_size,
+            chunk_overlap=overlap
         )
         return splitter.split_documents(docs)
 

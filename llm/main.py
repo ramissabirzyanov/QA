@@ -7,29 +7,18 @@ from langchain_community.llms.llamacpp import LlamaCpp
 from langchain.prompts import PromptTemplate
 
 from vector_storage.storage import VectorStorage
-from qph.settings import settings
-from qph.logger import logger
+from config.settings import document_settings, llm_settings
+from config.logger import logger
 
 
-def main():
-    if not os.path.exists(f"{settings.FAISS_INDEX_PATH}"):
-        logger.info("Хранилища нет — создаем...")
-        storage = VectorStorage()
-        storage.vectorise()
-
-    embeddings = HuggingFaceEmbeddings(model_name=settings.MODEL_NAME)
-    vectorstorage = FAISS.load_local(
-        settings.FAISS_INDEX_PATH,
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
-    PROMPT = PromptTemplate(
+PROMPT = PromptTemplate(
         input_variables=["context", "question"],
         template="""
     Ты — интеллектуальный помощник. Используй информацию из контекста, чтобы ответить на вопрос.
     Инструкции:
+    - Дай развернутый ответ, если конетекст позволяет.
     - Не добавляй информацию, если её нет в контексте.
-    - Если данных недостаточно — скажи: "В предоставленном контексте недостаточно информации, чтобы ответить."
+    - Если данных недостаточно — скажи: "У меня недостаточно информации, чтобы ответить."
     - Ответ должен быть на русском языке.
     Контекст:
     {context}
@@ -37,17 +26,40 @@ def main():
     """
     )
 
-    llm = LlamaCpp(
-        model_path="gguf_models/YandexGPT-5-Lite-8B-instruct-Q4_K_M.gguf",
-        n_ctx=2048,
-        temperature=0.5,
-        verbose=False,
-        n_batch=128,
-        max_tokens=512
+
+def get_retriever():
+    embeddings = HuggingFaceEmbeddings(model_name=document_settings.MODEL_NAME)
+    vectorstorage = FAISS.load_local(
+        document_settings.FAISS_INDEX_PATH,
+        embeddings,
+        allow_dangerous_deserialization=True
     )
     retriever = vectorstorage.as_retriever(search_kwargs={"k": 3})
+    return retriever
+
+
+def get_chain(prompt=PROMPT):
+    llm = LlamaCpp(
+        model_path=llm_settings.GGUF_MODEL,
+        n_ctx=llm_settings.N_CTX,
+        temperature=llm_settings.TEMPERATURE,
+        max_tokens=llm_settings.MAX_TOKENS,
+        verbose=llm_settings.VERBOSE,
+    )
+
     parser = StrOutputParser()
-    chain = PROMPT | llm | parser
+    chain = prompt | llm | parser
+    return chain
+
+
+def main():
+    if not os.path.exists(f"{document_settings.FAISS_INDEX_PATH}"):
+        logger.info("Хранилища нет — создаем...")
+        storage = VectorStorage()
+        storage.vectorise()
+
+    retriever = get_retriever()
+    chain = get_chain()
     try:
         while True:
             query = input("\nВаш вопрос: ")

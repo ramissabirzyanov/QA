@@ -3,16 +3,16 @@ import os
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from document.reader import get_reader
-from qph.settings import settings
-from qph.logger import logger
+from data_document.reader import get_reader
+from config.settings import document_settings
+from config.logger import logger
 
 
 class VectorStorage:
     def __init__(self):
-        self.data_dir = settings.DOCS_DIR
-        self.model = settings.MODEL_NAME
-        self.index_path = settings.FAISS_INDEX_PATH
+        self.data_dir = document_settings.DOCS_DIR
+        self.model = document_settings.MODEL_NAME
+        self.index_path = document_settings.FAISS_INDEX_PATH
 
     def vectorise(self) -> None:
         all_chunks = []
