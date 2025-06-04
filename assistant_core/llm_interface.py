@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -28,6 +29,11 @@ PROMPT = PromptTemplate(
 
 
 def get_retriever():
+    if not os.path.exists(f"{document_settings.FAISS_INDEX_PATH}"):
+        logger.info("Хранилища нет — создаем...")
+        storage = VectorStorage()
+        storage.vectorise()
+
     embeddings = HuggingFaceEmbeddings(model_name=document_settings.MODEL_NAME)
     vectorstorage = FAISS.load_local(
         document_settings.FAISS_INDEX_PATH,
@@ -53,11 +59,6 @@ def get_chain(prompt=PROMPT):
 
 
 def get_answer(query: str) -> str:
-    if not os.path.exists(f"{document_settings.FAISS_INDEX_PATH}"):
-        logger.info("Хранилища нет — создаем...")
-        storage = VectorStorage()
-        storage.vectorise()
-
     retriever = get_retriever()
     chain = get_chain()
     docs = retriever.invoke(query)
@@ -68,3 +69,8 @@ def get_answer(query: str) -> str:
         source = doc.metadata.get("source")
         logger.info(f"[{source}] {doc.page_content[:50]}...")
     return result
+
+
+async def get_answer_async(query: str) -> str:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, get_answer, query)
