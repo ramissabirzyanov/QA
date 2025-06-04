@@ -1,3 +1,5 @@
+import os
+
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
@@ -5,6 +7,8 @@ from langchain_community.llms.llamacpp import LlamaCpp
 from langchain.prompts import PromptTemplate
 
 from config.settings import llm_settings, document_settings
+from vector_storage.storage import VectorStorage
+from config.logger import logger
 
 
 PROMPT = PromptTemplate(
@@ -46,3 +50,21 @@ def get_chain(prompt=PROMPT):
     parser = StrOutputParser()
     chain = prompt | llm | parser
     return chain
+
+
+def get_answer(query: str) -> str:
+    if not os.path.exists(f"{document_settings.FAISS_INDEX_PATH}"):
+        logger.info("Хранилища нет — создаем...")
+        storage = VectorStorage()
+        storage.vectorise()
+
+    retriever = get_retriever()
+    chain = get_chain()
+    docs = retriever.invoke(query)
+    context = "\n\n".join([doc.page_content for doc in docs])
+    result = chain.invoke({"context": context, "question": query})
+    logger.info("\nНайденные документы:")
+    for doc in docs:
+        source = doc.metadata.get("source")
+        logger.info(f"[{source}] {doc.page_content[:50]}...")
+    return result
