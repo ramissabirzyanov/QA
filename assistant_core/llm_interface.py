@@ -51,7 +51,7 @@ def get_chain(prompt=PROMPT):
         temperature=llm_settings.TEMPERATURE,
         max_tokens=llm_settings.MAX_TOKENS,
         verbose=llm_settings.VERBOSE,
-        n_batch=llm_settings.N_BATCH
+        n_batch=llm_settings.N_BATCH,
     )
 
     parser = StrOutputParser()

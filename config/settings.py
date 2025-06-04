@@ -22,7 +22,8 @@ class LLM_Settings(BaseSettings):
     TEMPERATURE: float = 0.5
     MAX_TOKENS: int = 512
     VERBOSE: bool = False
-    N_BATCH: int = 64
+    N_BATCH: int = 512
+    N_THREADS: int = 4
 
     model_config = SettingsConfigDict(
         env_file=".env", extra="allow"
