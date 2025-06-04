@@ -58,9 +58,7 @@ def get_chain(prompt=PROMPT):
     return chain
 
 
-def get_answer(query: str) -> str:
-    retriever = get_retriever()
-    chain = get_chain()
+def get_answer(chain, retriever, query: str) -> str:
     docs = retriever.invoke(query)
     context = "\n\n".join([doc.page_content for doc in docs])
     result = chain.invoke({"context": context, "question": query})
@@ -71,6 +69,6 @@ def get_answer(query: str) -> str:
     return result
 
 
-async def get_answer_async(query: str) -> str:
+async def get_answer_async(chain, retriever, query: str) -> str:
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, get_answer, query)
+    return await loop.run_in_executor(None, get_answer,  chain, retriever, query)
