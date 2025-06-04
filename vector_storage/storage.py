@@ -3,7 +3,7 @@ import os
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from document_readers.reader import get_reader
+from document.reader import get_reader
 from qph.settings import settings
 from qph.logger import logger
 

@@ -4,8 +4,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.llms.llamacpp import LlamaCpp
-
-
 from vector_storage.storage import VectorStorage
 from qph.settings import settings
 from qph.logger import logger
@@ -27,27 +25,24 @@ def main():
     PROMPT = PromptTemplate(
         input_variables=["context", "question"],
         template="""
-        Ты — интеллектуальный помощник, который отвечает на вопросы, используя предоставленный контекст.
-        Контекст:
-        {context}
-        Вопрос:
-        {question}
-        Если в контексте достаточно информации, дай подробный и развернутый ответ.
-        Если в вопросе требуется указать количество или число, посчитай и дай точный ответ.
-        Ответ должен быть на русском языке.
+    Ты — интеллектуальный помощник. Используй информацию из контекста, чтобы ответить на вопрос.
+    Инструкции:
+    - Не добавляй информацию, если её нет в контексте.
+    - Если данных недостаточно — скажи: "В предоставленном контексте недостаточно информации, чтобы ответить."
+    - Ответ должен быть на русском языке.
+    Контекст:
+    {context}
+    Вопрос: {question}
     """
     )
 
     llm = LlamaCpp(
-        model_path="gguf_models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
-        n_ctx=1024,
+        model_path="gguf_models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf",
+        n_ctx=2048,
         temperature=0.5,
         verbose=False,
-        n_threads=8,
-        n_gpu_layers=16,
         n_batch=128,
-        max_tokens=256,
-        repeat_penalty=1.1,
+        max_tokens=512
     )
     retriever = vectorstorage.as_retriever(search_kwargs={"k": 3})
     parser = StrOutputParser()
