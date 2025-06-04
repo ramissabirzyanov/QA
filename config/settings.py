@@ -18,10 +18,11 @@ class DocumentSettings(BaseSettings):
 
 class LLM_Settings(BaseSettings):
     GGUF_MODEL: str
-    N_CTX: int = 2048
+    N_CTX: int = 4096
     TEMPERATURE: float = 0.5
     MAX_TOKENS: int = 512
     VERBOSE: bool = False
+    N_BATCH: int = 64
 
     model_config = SettingsConfigDict(
         env_file=".env", extra="allow"

@@ -51,6 +51,7 @@ def get_chain(prompt=PROMPT):
         temperature=llm_settings.TEMPERATURE,
         max_tokens=llm_settings.MAX_TOKENS,
         verbose=llm_settings.VERBOSE,
+        n_batch=llm_settings.N_BATCH
     )
 
     parser = StrOutputParser()
@@ -58,7 +59,8 @@ def get_chain(prompt=PROMPT):
     return chain
 
 
-def get_answer(chain, retriever, query: str) -> str:
+def get_answer(retriever, query: str) -> str:
+    chain = get_chain()
     docs = retriever.invoke(query)
     context = "\n\n".join([doc.page_content for doc in docs])
     result = chain.invoke({"context": context, "question": query})
@@ -69,6 +71,6 @@ def get_answer(chain, retriever, query: str) -> str:
     return result
 
 
-async def get_answer_async(chain, retriever, query: str) -> str:
+async def get_answer_async(retriever, query: str) -> str:
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, get_answer,  chain, retriever, query)
+    return await loop.run_in_executor(None, get_answer, retriever, query)
