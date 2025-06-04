@@ -12,7 +12,6 @@ class Settings(BaseSettings):
     MODEL_NAME: str
     FAISS_INDEX_PATH: str
     HF_API_TOKEN: str
-    MODEL_REPO_ID: str
 
     model_config = SettingsConfigDict(
         env_file=".env", extra="allow"

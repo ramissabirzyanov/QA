@@ -4,10 +4,11 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.llms.llamacpp import LlamaCpp
+from langchain.prompts import PromptTemplate
+
 from vector_storage.storage import VectorStorage
 from qph.settings import settings
 from qph.logger import logger
-from langchain.prompts import PromptTemplate
 
 
 def main():
@@ -37,7 +38,7 @@ def main():
     )
 
     llm = LlamaCpp(
-        model_path="gguf_models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf",
+        model_path="gguf_models/YandexGPT-5-Lite-8B-instruct-Q4_K_M.gguf",
         n_ctx=2048,
         temperature=0.5,
         verbose=False,
