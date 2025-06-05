@@ -17,7 +17,9 @@ PROMPT = PromptTemplate(
         input_variables=["context", "question"],
         template="""
     Ты — интеллектуальный помощник.
-    Используй информацию только из контекста, чтобы ответить на вопрос.
+    Отвечай на вопросы на основе фактов из контекста.
+    Не придумывай факты, которых нет контексте.
+    Ты должен давать четкие, прямые ответы.
     Контекст:
     {context}
     Вопрос: {question}
@@ -48,7 +50,8 @@ def get_chain(prompt=PROMPT):
         temperature=llm_settings.TEMPERATURE,
         max_tokens=llm_settings.MAX_TOKENS,
         verbose=llm_settings.VERBOSE,
-        n_batch=llm_settings.N_BATCH
+        n_batch=llm_settings.N_BATCH,
+        n_threads=llm_settings.N_THREADS
     )
     parser = StrOutputParser()
     chain = prompt | llm | parser
@@ -57,7 +60,7 @@ def get_chain(prompt=PROMPT):
 
 # def get_answer(retriever: BaseRetriever, query: str) -> str:
 #     chain = get_chain()
-#     docs = retriever.get_relevant_documents(query)
+#     docs = retriever.invoke(query)
 #     context = "\n\n".join([doc.page_content for doc in docs])
 #     result = chain.invoke({"context": context, "question": query})
 #     logger.info("\nНайденные документы:")
@@ -73,7 +76,7 @@ def get_chain(prompt=PROMPT):
 
 async def get_answer_async(retriever: BaseRetriever, query: str) -> str:
     chain = get_chain()
-    docs = await retriever.aget_relevant_documents(query)
+    docs = await retriever.ainvoke(query)
     context = "\n\n".join([doc.page_content for doc in docs])
     result = await chain.ainvoke({"context": context, "question": query})
     logger.info("\nНайденные документы:")

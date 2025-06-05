@@ -18,12 +18,12 @@ class DocumentSettings(BaseSettings):
 
 class LLM_Settings(BaseSettings):
     GGUF_MODEL: str
-    N_CTX: int = 2048
-    TEMPERATURE: float = 0.3
+    N_CTX: int = 4096
+    TEMPERATURE: float = 0.5
     MAX_TOKENS: int = 256
     VERBOSE: bool = False
     N_BATCH: int = 512
-    N_THREADS: int = 0
+    N_THREADS: int = 4
     N_GPU_LAYERS: int = 0
 
     model_config = SettingsConfigDict(
