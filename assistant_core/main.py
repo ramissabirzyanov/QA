@@ -6,7 +6,6 @@ from assistant_core.llm_interface import get_retriever
 from assistant_core.middlewares import RequestTimeMiddleware
 
 
-
 async def lifespan(app: FastAPI):
     app.state.retriever = get_retriever()
     yield

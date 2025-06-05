@@ -1,9 +1,10 @@
 import os
-import asyncio
+# import asyncio
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.retrievers import BaseRetriever
 from langchain_community.llms.llamacpp import LlamaCpp
 from langchain.prompts import PromptTemplate
 
@@ -15,12 +16,8 @@ from config.logger import logger
 PROMPT = PromptTemplate(
         input_variables=["context", "question"],
         template="""
-    Ты — интеллектуальный помощник. Используй информацию из контекста, чтобы ответить на вопрос.
-    Инструкции:
-    - Дай развернутый ответ, если конетекст позволяет.
-    - Не добавляй информацию, если её нет в контексте.
-    - Если данных недостаточно — скажи: "У меня недостаточно информации, чтобы ответить."
-    - Ответ должен быть на русском языке.
+    Ты — интеллектуальный помощник.
+    Используй информацию только из контекста, чтобы ответить на вопрос.
     Контекст:
     {context}
     Вопрос: {question}
@@ -28,7 +25,7 @@ PROMPT = PromptTemplate(
     )
 
 
-def get_retriever():
+def get_retriever() -> BaseRetriever:
     if not os.path.exists(f"{document_settings.FAISS_INDEX_PATH}"):
         logger.info("Хранилища нет — создаем...")
         storage = VectorStorage()
@@ -51,26 +48,36 @@ def get_chain(prompt=PROMPT):
         temperature=llm_settings.TEMPERATURE,
         max_tokens=llm_settings.MAX_TOKENS,
         verbose=llm_settings.VERBOSE,
-        n_batch=llm_settings.N_BATCH,
+        n_batch=llm_settings.N_BATCH
     )
-
     parser = StrOutputParser()
     chain = prompt | llm | parser
     return chain
 
 
-def get_answer(retriever, query: str) -> str:
+# def get_answer(retriever: BaseRetriever, query: str) -> str:
+#     chain = get_chain()
+#     docs = retriever.get_relevant_documents(query)
+#     context = "\n\n".join([doc.page_content for doc in docs])
+#     result = chain.invoke({"context": context, "question": query})
+#     logger.info("\nНайденные документы:")
+#     for doc in docs:
+#         source = doc.metadata.get("source")
+#         logger.info(f"[{source}] {doc.page_content[:50]}...")
+#     return result
+
+
+# async def get_answer_async(retriever, query: str) -> str:
+#     loop = asyncio.get_event_loop()
+#     return await loop.run_in_executor(None, get_answer, retriever, query)
+
+async def get_answer_async(retriever: BaseRetriever, query: str) -> str:
     chain = get_chain()
-    docs = retriever.invoke(query)
+    docs = await retriever.aget_relevant_documents(query)
     context = "\n\n".join([doc.page_content for doc in docs])
-    result = chain.invoke({"context": context, "question": query})
+    result = await chain.ainvoke({"context": context, "question": query})
     logger.info("\nНайденные документы:")
     for doc in docs:
         source = doc.metadata.get("source")
         logger.info(f"[{source}] {doc.page_content[:50]}...")
     return result
-
-
-async def get_answer_async(retriever, query: str) -> str:
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, get_answer, retriever, query)
