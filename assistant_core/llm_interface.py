@@ -1,6 +1,6 @@
 import os
 # import asyncio
-
+from redis.asyncio import Redis
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
@@ -97,7 +97,13 @@ def get_chain(llm_type: str = "llamacpp", prompt: PromptTemplate = PROMPT) -> Ru
 #     return await loop.run_in_executor(None, get_answer, chain, retriever, query)
 
 
-async def get_answer_async(chain: Runnable, retriever: BaseRetriever, query: str) -> str:
+async def get_answer_async(chain: Runnable, retriever: BaseRetriever, query: str, redis: Redis) -> str:
+    cache_key = f"qa_cache:{query}"
+
+    cached_answer = await redis.get(cache_key)
+    if cached_answer:
+        return cached_answer
+
     docs = await retriever.ainvoke(query)
     context = "\n\n".join([doc.page_content for doc in docs])
     result = await chain.ainvoke({"context": context, "question": query})
@@ -105,4 +111,5 @@ async def get_answer_async(chain: Runnable, retriever: BaseRetriever, query: str
     for doc in docs:
         source = doc.metadata.get("source")
         logger.info(f"[{source}] {doc.page_content[:50]}...")
+    await redis.set(cache_key, result)
     return result
