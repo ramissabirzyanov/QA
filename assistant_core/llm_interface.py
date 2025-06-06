@@ -5,6 +5,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.retrievers import BaseRetriever
+from langchain_core.runnables import Runnable
+from langchain_community.llms.vllm import VLLM
 from langchain_community.llms.llamacpp import LlamaCpp
 from langchain.prompts import PromptTemplate
 
@@ -43,23 +45,43 @@ def get_retriever() -> BaseRetriever:
     return retriever
 
 
-def get_chain(prompt=PROMPT):
-    llm = LlamaCpp(
-        model_path=llm_settings.GGUF_MODEL,
-        n_ctx=llm_settings.N_CTX,
-        temperature=llm_settings.TEMPERATURE,
-        max_tokens=llm_settings.MAX_TOKENS,
-        verbose=llm_settings.VERBOSE,
-        n_batch=llm_settings.N_BATCH,
-        n_threads=llm_settings.N_THREADS
-    )
+def get_llm(llm_type: str) -> Runnable:
+    """Фабрика для выбора LLM: 'llamacpp' или 'vllm'"""
+
+    if llm_type == "vllm":  # набросок
+        llm = VLLM(
+            model="yandex/YandexGPT-5-Lite-8B-instruct",
+            max_new_tokens=llm_settings.MAX_TOKENS,
+            temperature=llm_settings.TEMPERATURE,
+            top_p=0.9,
+            model_kwargs={"gpu_memory_utilization": 0.9},
+            verbose=llm_settings.VERBOSE
+        )
+    elif llm_type == "llamacpp":
+        llm = LlamaCpp(
+            model_path=llm_settings.GGUF_MODEL,
+            n_ctx=llm_settings.N_CTX,
+            temperature=llm_settings.TEMPERATURE,
+            max_tokens=llm_settings.MAX_TOKENS,
+            verbose=llm_settings.VERBOSE,
+            n_batch=llm_settings.N_BATCH,
+            n_threads=llm_settings.N_THREADS,
+            n_gpu_layers=llm_settings.N_GPU_LAYERS
+        )
+    else:
+        raise ValueError(f"Неизвестный тип llm: {llm_type}")
+
+    return llm
+
+
+def get_chain(llm_type: str = "llamacpp", prompt: PromptTemplate = PROMPT) -> Runnable:
+    llm = get_llm(llm_type)
     parser = StrOutputParser()
     chain = prompt | llm | parser
     return chain
 
 
-# def get_answer(retriever: BaseRetriever, query: str) -> str:
-#     chain = get_chain()
+# def get_answer(chain: Runnable, retriever: BaseRetriever, query: str) -> str:
 #     docs = retriever.invoke(query)
 #     context = "\n\n".join([doc.page_content for doc in docs])
 #     result = chain.invoke({"context": context, "question": query})
@@ -70,12 +92,12 @@ def get_chain(prompt=PROMPT):
 #     return result
 
 
-# async def get_answer_async(retriever, query: str) -> str:
+# async def get_answer_async(chain, retriever, query: str) -> str:
 #     loop = asyncio.get_event_loop()
-#     return await loop.run_in_executor(None, get_answer, retriever, query)
+#     return await loop.run_in_executor(None, get_answer, chain, retriever, query)
 
-async def get_answer_async(retriever: BaseRetriever, query: str) -> str:
-    chain = get_chain()
+
+async def get_answer_async(chain: Runnable, retriever: BaseRetriever, query: str) -> str:
     docs = await retriever.ainvoke(query)
     context = "\n\n".join([doc.page_content for doc in docs])
     result = await chain.ainvoke({"context": context, "question": query})
