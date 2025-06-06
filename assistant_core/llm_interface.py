@@ -1,5 +1,5 @@
 import os
-# import asyncio
+
 from redis.asyncio import Redis
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -47,7 +47,6 @@ def get_retriever() -> BaseRetriever:
 
 def get_llm(llm_type: str) -> Runnable:
     """Фабрика для выбора LLM: 'llamacpp' или 'vllm'"""
-
     if llm_type == "vllm":  # набросок
         llm = VLLM(
             model="yandex/YandexGPT-5-Lite-8B-instruct",
@@ -70,7 +69,6 @@ def get_llm(llm_type: str) -> Runnable:
         )
     else:
         raise ValueError(f"Неизвестный тип llm: {llm_type}")
-
     return llm
 
 
@@ -81,23 +79,11 @@ def get_chain(llm_type: str = "llamacpp", prompt: PromptTemplate = PROMPT) -> Ru
     return chain
 
 
-# def get_answer(chain: Runnable, retriever: BaseRetriever, query: str) -> str:
-#     docs = retriever.invoke(query)
-#     context = "\n\n".join([doc.page_content for doc in docs])
-#     result = chain.invoke({"context": context, "question": query})
-#     logger.info("\nНайденные документы:")
-#     for doc in docs:
-#         source = doc.metadata.get("source")
-#         logger.info(f"[{source}] {doc.page_content[:50]}...")
-#     return result
-
-
-# async def get_answer_async(chain, retriever, query: str) -> str:
-#     loop = asyncio.get_event_loop()
-#     return await loop.run_in_executor(None, get_answer, chain, retriever, query)
-
-
-async def get_answer_async(chain: Runnable, retriever: BaseRetriever, query: str, redis: Redis) -> str:
+async def get_answer_async(
+    chain: Runnable,
+    retriever: BaseRetriever,
+    query: str, redis: Redis
+) -> str:
     cache_key = f"qa_cache:{query}"
 
     cached_answer = await redis.get(cache_key)
