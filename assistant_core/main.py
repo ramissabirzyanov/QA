@@ -23,14 +23,13 @@ BASE_URL = os.getenv("BASE_URL")
 
 
 async def lifespan(app: FastAPI):
-    # app.state.retriever = get_retriever()
-    # app.state.chain = get_chain()
     app.state.assistant = Assistant()
     app.state.redis = Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
     telegram_app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     telegram_app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     telegram_app.add_handler(CommandHandler("start", start_command))
+
     app.state.telegram_app = telegram_app
 
     bot = telegram_app.bot
