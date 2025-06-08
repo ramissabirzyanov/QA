@@ -17,6 +17,7 @@ class DocumentSettings(BaseSettings):
 
 
 class LLM_Settings(BaseSettings):
+    LLM_TYPE: str = "llamacpp"
     GGUF_MODEL: str
     N_CTX: int = 4096
     TEMPERATURE: float = 0.1

@@ -14,6 +14,7 @@ BASE_URL = os.getenv("BASE_URL")
 
 
 async def ask_api(question: str) -> str:
+    """Отправляет вопрос в backend API и возвращает ответ."""
     async with httpx.AsyncClient(timeout=httpx.Timeout(30.0)) as client:
         response = await client.post(f"{BASE_URL}/ask", json={"question": question})
         response.raise_for_status()
@@ -22,9 +23,9 @@ async def ask_api(question: str) -> str:
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обрабатывает входящие текстовые сообщения от пользователя."""
     user_question = update.message.text
     chat_id = update.message.chat_id
-
     try:
         answer = await ask_api(user_question)
     except httpx.RequestError as e:
@@ -37,7 +38,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Telegram error: {e}")
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Отправляет приветственное сообщение при команде /start."""
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=(
@@ -45,6 +47,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Давай начнём."
         )
     )
+
 
 async def run_polling(telegram_app: Application):
     """Запускает бота в режиме polling"""

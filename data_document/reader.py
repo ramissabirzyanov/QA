@@ -11,6 +11,7 @@ from config.logger import logger
 
 
 class BaseDocument(ABC):
+    """Базовый класс для чтения и разбиения документа на чанки."""
     def __init__(self, file_path: str):
         self.file_path = file_path
 
@@ -53,6 +54,7 @@ class PDF_Reader(BaseDocument):
 
 
 def get_reader(file_path: str):
+    """Возвращает подходящий ридер для файла по расширению."""
     _, ext = os.path.splitext(file_path)
     ext = ext.lower()
     if ext == ".pdf":

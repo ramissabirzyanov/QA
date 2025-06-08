@@ -6,13 +6,13 @@ from fastapi import FastAPI
 from redis.asyncio import Redis
 from dotenv import load_dotenv
 
-from telegram import Bot
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, CommandHandler
 
 from assistant_core.endpoints import router as api_router
-from assistant_core.llm_interface import get_retriever, get_chain
+# from assistant_core.assistant_interface import get_retriever, get_chain
 from assistant_core.middlewares import RequestTimeMiddleware
 from assistant_core.bot import handle_message, run_polling, start_command
+from assistant_core.assistant_interface import Assistant
 from config.logger import logger
 
 
@@ -23,8 +23,9 @@ BASE_URL = os.getenv("BASE_URL")
 
 
 async def lifespan(app: FastAPI):
-    app.state.retriever = get_retriever()
-    app.state.chain = get_chain()
+    # app.state.retriever = get_retriever()
+    # app.state.chain = get_chain()
+    app.state.assistant = Assistant()
     app.state.redis = Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
     telegram_app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
@@ -50,6 +51,7 @@ async def lifespan(app: FastAPI):
         # await bot.delete_webhook()
         await app.state.redis.close()
         await app.state.redis.connection_pool.disconnect()
+        await telegram_app.shutdown()
 
 
 app = FastAPI(lifespan=lifespan)
