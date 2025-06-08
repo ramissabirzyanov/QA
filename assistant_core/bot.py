@@ -1,10 +1,8 @@
 import os
-import asyncio
 
-from telegram.ext import ApplicationBuilder, MessageHandler, filters
 from telegram.error import TelegramError
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, Application
 import httpx
 from dotenv import load_dotenv
 
@@ -12,13 +10,11 @@ from config.logger import logger
 
 
 load_dotenv()
-
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+BASE_URL = os.getenv("BASE_URL")
 
 
 async def ask_api(question: str) -> str:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(30.0)) as client:
         response = await client.post(f"{BASE_URL}/ask", json={"question": question})
         response.raise_for_status()
         data = response.json()
@@ -33,14 +29,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         answer = await ask_api(user_question)
     except httpx.RequestError as e:
         logger.error(f"Error while asking API: {e}")
-        answer = "Извините, произошла ошибка при обработке вашего запроса."
+        logger.exception("Error while asking API")
+        answer = "Извините, произошла ошибка при обработке вашего запроса:."
     try:
         await context.bot.send_message(chat_id=chat_id, text=answer)
     except TelegramError as e:
         logger.error(f"Telegram error: {e}")
 
 
-async def run_bot():
-    application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-    application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-    await application.run_polling()
+async def run_polling(telegram_app: Application):
+    """Запускает бота в режиме polling"""
+    await telegram_app.initialize()
+    await telegram_app.start()
+    await telegram_app.updater.start_polling()
