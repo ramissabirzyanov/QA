@@ -27,9 +27,9 @@ async def ask_question(
     return AnswerSchema(answer=answer)
 
 
-# @router.post("/telegram_webhook")
-# async def telegram_webhook(request: Request, telegram_app=Depends(get_telegram_app_dep)):
-#     json_update = await request.json()
-#     update = Update.de_json(json_update, telegram_app.bot)
-#     await telegram_app.process_update(update)
-#     return {"status": "ok"}
+@router.post("/telegram_webhook")
+async def telegram_webhook(request: Request, telegram_app=Depends(get_telegram_app_dep)):
+    json_update = await request.json()
+    update = Update.de_json(json_update, telegram_app.bot)
+    await telegram_app.process_update(update)
+    return {"status": "ok"}
