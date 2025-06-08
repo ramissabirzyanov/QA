@@ -7,12 +7,12 @@ from redis.asyncio import Redis
 from dotenv import load_dotenv
 
 from telegram import Bot
-from telegram.ext import ApplicationBuilder, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, MessageHandler, filters, CommandHandler
 
 from assistant_core.endpoints import router as api_router
 from assistant_core.llm_interface import get_retriever, get_chain
 from assistant_core.middlewares import RequestTimeMiddleware
-from assistant_core.bot import handle_message, run_polling
+from assistant_core.bot import handle_message, run_polling, start_command
 from config.logger import logger
 
 
@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
 
     telegram_app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     telegram_app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    telegram_app.add_handler(CommandHandler("start", start_command))
     app.state.telegram_app = telegram_app
 
     bot = telegram_app.bot

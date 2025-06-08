@@ -37,6 +37,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Telegram error: {e}")
 
 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=(
+            "Привет! Я очень постараюсь ответить на твои вопросы о компании. "
+            "Давай начнём."
+        )
+    )
+
 async def run_polling(telegram_app: Application):
     """Запускает бота в режиме polling"""
     await telegram_app.initialize()
