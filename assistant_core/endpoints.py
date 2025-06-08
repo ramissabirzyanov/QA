@@ -8,7 +8,7 @@ from assistant_core.dependencies import (
     get_assistant_dep
 )
 from assistant_core.schemas import QuerySchema, AnswerSchema
-from assistant_core.assistant_interface import Assistant
+from assistant_core.assistant import Assistant
 
 
 router = APIRouter()

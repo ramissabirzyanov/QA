@@ -12,7 +12,7 @@ from assistant_core.endpoints import router as api_router
 # from assistant_core.assistant_interface import get_retriever, get_chain
 from assistant_core.middlewares import RequestTimeMiddleware
 from assistant_core.bot import handle_message, run_polling, start_command
-from assistant_core.assistant_interface import Assistant
+from assistant_core.assistant import Assistant
 from config.logger import logger
 
 
