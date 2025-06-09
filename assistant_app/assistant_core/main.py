@@ -33,20 +33,22 @@ async def lifespan(app: FastAPI):
 
     bot = telegram_app.bot
 
-    # webhook_url = f"{BASE_URL}/telegram_webhook"
-    # await bot.set_webhook(webhook_url)
-    # logger.info(f"Webhook установлен: {webhook_url}")
+    webhook_url = f"{BASE_URL}/telegram_webhook"
+    await bot.set_webhook(webhook_url)
+    logger.info(f"Webhook установлен: {webhook_url}")
 
-    await bot.delete_webhook(drop_pending_updates=True)
-    logger.info("Webhook удалён. Переход на polling.")
+    # await bot.delete_webhook(drop_pending_updates=True)
+    # logger.info("Webhook удалён. Переход на polling.")
 
-    asyncio.create_task(run_polling(telegram_app))
-    logger.info("Бот запущен в режиме polling")
+    # asyncio.create_task(run_polling(telegram_app))
+    # logger.info("Бот запущен в режиме polling")
 
     try:
+        await telegram_app.initialize()
         yield
     finally:
-        # await bot.delete_webhook()
+        await telegram_app.shutdown()
+        await bot.delete_webhook()
         await app.state.redis.close()
         await app.state.redis.connection_pool.disconnect()
 

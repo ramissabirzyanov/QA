@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from redis.asyncio import Redis
 from telegram import Update
+from telegram.ext import Application
 
 from assistant_app.assistant_core.dependencies import (
     get_redis_dep,
@@ -28,7 +29,10 @@ async def ask_question(
 
 
 @router.post("/telegram_webhook")
-async def telegram_webhook(request: Request, telegram_app=Depends(get_telegram_app_dep)):
+async def telegram_webhook(
+    request: Request,
+    telegram_app: Application = Depends(get_telegram_app_dep)
+):
     json_update = await request.json()
     update = Update.de_json(json_update, telegram_app.bot)
     await telegram_app.process_update(update)

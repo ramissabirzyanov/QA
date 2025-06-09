@@ -8,6 +8,8 @@ def setup_logging(debug=False):
         format='%(asctime)s - %(levelname)s - %(message)s',
         handlers=[logging.StreamHandler()]
     )
+    logging.getLogger("telegram").setLevel(logging.ERROR)
+    logging.getLogger("httpx").setLevel(logging.ERROR)
     return logging.getLogger(__name__)
 
 
