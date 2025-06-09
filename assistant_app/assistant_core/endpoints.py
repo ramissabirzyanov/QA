@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, Request
 from redis.asyncio import Redis
 from telegram import Update
 
-from assistant.assistant_core.dependencies import (
+from assistant_app.assistant_core.dependencies import (
     get_redis_dep,
     get_telegram_app_dep,
     get_assistant_dep
 )
-from assistant.assistant_core.schemas import QuerySchema, AnswerSchema
-from assistant.assistant_core.assistant import Assistant
+from assistant_app.assistant_core.schemas import QuerySchema, AnswerSchema
+from assistant_app.assistant_core.assistant import Assistant
 
 
 router = APIRouter()

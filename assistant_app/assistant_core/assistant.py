@@ -10,9 +10,9 @@ from langchain_community.llms.vllm import VLLM
 from langchain_community.llms.llamacpp import LlamaCpp
 from langchain.prompts import PromptTemplate
 
-from assistant.config.settings import llm_settings, document_settings
-from assistant.vector_storage.storage import VectorStorage
-from assistant.config.logger import logger
+from assistant_app.config.settings import llm_settings, document_settings
+from assistant_app.vector_storage.storage import VectorStorage
+from assistant_app.config.logger import logger
 
 
 class Assistant:

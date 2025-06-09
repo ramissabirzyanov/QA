@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, CommandHandler
 
-from assistant.assistant_core.endpoints import router as api_router
-from assistant.assistant_core.middlewares import RequestTimeMiddleware
-from assistant.assistant_core.bot import handle_message, run_polling, start_command
-from assistant.assistant_core.assistant import Assistant
-from assistant.config.logger import logger
+from assistant_app.assistant_core.endpoints import router as api_router
+from assistant_app.assistant_core.middlewares import RequestTimeMiddleware
+from assistant_app.assistant_core.bot import handle_message, run_polling, start_command
+from assistant_app.assistant_core.assistant import Assistant
+from assistant_app.config.logger import logger
 
 
 load_dotenv()
@@ -58,4 +58,4 @@ app.include_router(api_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run("assistant.assistant_core.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("assistant_app.assistant_core.main:app", host="0.0.0.0", port=8000, reload=True)

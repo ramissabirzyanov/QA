@@ -2,7 +2,7 @@ import time
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from assistant.config.logger import logger
+from assistant_app.config.logger import logger
 
 
 class RequestTimeMiddleware(BaseHTTPMiddleware):
