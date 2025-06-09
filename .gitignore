@@ -5,3 +5,5 @@ vector_index
 .cache
 gguf_models
 .flake8
+dump.rdb
+.DS_Store

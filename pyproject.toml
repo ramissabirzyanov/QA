@@ -1,10 +1,11 @@
 [project]
-name = "qa"
+name = "assistant"
 version = "0.1.0"
 description = ""
 authors = [
     {name = "Your Name",email = "you@example.com"}
 ]
+packages = [{include = "assistant"}]
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 dependencies = [

@@ -6,8 +6,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from langchain_community.document_loaders import Docx2txtLoader
 from langchain_community.document_loaders import PyMuPDFLoader
-from config.settings import document_settings
-from config.logger import logger
+from assistant.config.settings import document_settings
+from assistant.config.logger import logger
 
 
 class BaseDocument(ABC):

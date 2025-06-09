@@ -3,9 +3,9 @@ import os
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from data_document.reader import get_reader
-from config.settings import document_settings
-from config.logger import logger
+from assistant.data_document.reader import get_reader
+from assistant.config.settings import document_settings
+from assistant.config.logger import logger
 
 
 class VectorStorage:

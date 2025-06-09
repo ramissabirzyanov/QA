@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes, Application
 import httpx
 from dotenv import load_dotenv
 
-from config.logger import logger
+from assistant.config.logger import logger
 
 
 load_dotenv()

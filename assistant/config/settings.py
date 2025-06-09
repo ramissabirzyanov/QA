@@ -9,7 +9,7 @@ class DocumentSettings(BaseSettings):
     CHUNK_SIZE: int = 700
     CHUNK_OVERLAP: int = 200
     MODEL_NAME: str
-    FAISS_INDEX_PATH: Path = Path("vector_storage/vector_index")
+    FAISS_INDEX_PATH: Path = Path("vector_index")
 
     model_config = SettingsConfigDict(
         env_file=".env", extra="allow"
