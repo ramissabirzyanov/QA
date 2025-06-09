@@ -18,7 +18,8 @@ from assistant_app.config.logger import logger
 load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-BASE_URL = os.getenv("BASE_URL")
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+USE_WEBHOOK = True
 
 
 async def lifespan(app: FastAPI):
@@ -31,24 +32,25 @@ async def lifespan(app: FastAPI):
 
     app.state.telegram_app = telegram_app
 
-    bot = telegram_app.bot
+    await telegram_app.initialize()    
 
-    webhook_url = f"{BASE_URL}/telegram_webhook"
-    await bot.set_webhook(webhook_url)
-    logger.info(f"Webhook установлен: {webhook_url}")
+    if USE_WEBHOOK:
+        webhook_url = f"{BASE_URL}/telegram_webhook"
+        await telegram_app.bot.set_webhook(webhook_url)
+        logger.info(f"Webhook установлен: {webhook_url}")
 
-    # await bot.delete_webhook(drop_pending_updates=True)
-    # logger.info("Webhook удалён. Переход на polling.")
-
-    # asyncio.create_task(run_polling(telegram_app))
-    # logger.info("Бот запущен в режиме polling")
+    else:
+        asyncio.create_task(run_polling(telegram_app))
+        logger.info("Бот запущен в режиме polling")
 
     try:
-        await telegram_app.initialize()
         yield
     finally:
         await telegram_app.shutdown()
-        await bot.delete_webhook()
+
+        if USE_WEBHOOK:
+            await telegram_app.bot.delete_webhook()
+            logger.info("Webhook удалён")
         await app.state.redis.close()
         await app.state.redis.connection_pool.disconnect()
 

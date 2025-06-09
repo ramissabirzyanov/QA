@@ -10,7 +10,7 @@ from assistant_app.config.logger import logger
 
 
 load_dotenv()
-BASE_URL = os.getenv("BASE_URL")
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
 
 async def ask_api(question: str) -> str:
@@ -51,6 +51,5 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def run_polling(telegram_app: Application):
     """Запускает бота в режиме polling"""
-    await telegram_app.initialize()
     await telegram_app.start()
     await telegram_app.updater.start_polling()
