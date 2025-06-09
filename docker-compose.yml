@@ -16,8 +16,6 @@ services:
       DB: 1
       DECODE: "true"
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-    volumes:
-      - /Users/ramis/Desktop/QPh/gguf_models:/bot/gguf_models
 
 
   redis:

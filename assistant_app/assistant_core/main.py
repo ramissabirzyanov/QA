@@ -49,7 +49,6 @@ async def lifespan(app: FastAPI):
         # await bot.delete_webhook()
         await app.state.redis.close()
         await app.state.redis.connection_pool.disconnect()
-        await telegram_app.shutdown()
 
 
 app = FastAPI(lifespan=lifespan)
