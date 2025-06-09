@@ -32,17 +32,15 @@ async def lifespan(app: FastAPI):
 
     app.state.telegram_app = telegram_app
 
-    await telegram_app.initialize()    
+    await telegram_app.initialize()
 
     if USE_WEBHOOK:
         webhook_url = f"{BASE_URL}/telegram_webhook"
         await telegram_app.bot.set_webhook(webhook_url)
         logger.info(f"Webhook установлен: {webhook_url}")
-
     else:
         asyncio.create_task(run_polling(telegram_app))
         logger.info("Бот запущен в режиме polling")
-
     try:
         yield
     finally:
