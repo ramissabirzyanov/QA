@@ -19,7 +19,7 @@ load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
-USE_WEBHOOK = True
+USE_WEBHOOK = False
 
 
 async def lifespan(app: FastAPI):

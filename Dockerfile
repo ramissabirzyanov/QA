@@ -19,10 +19,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libblas-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Установка poetry
+
 RUN pip install --no-cache-dir poetry
 
-# Poetry без виртуальных окружений
 ENV POETRY_VIRTUALENVS_CREATE=false
 
 # Флаги для сборки llama-cpp-python
@@ -32,15 +31,12 @@ ENV NINJA_ARGS="-v"
 
 WORKDIR /bot
 
-# Копируем зависимости проекта
 COPY pyproject.toml poetry.lock ./
 
-# Устанавливаем только основные зависимости (без llama-cpp-python)
 RUN poetry install --only main --no-root
 RUN pip wheel --no-cache-dir --use-pep517 "llama-cpp-python==0.3.9"
 
-# Устанавливаем собранный wheel
+
 RUN pip install --no-cache-dir llama-cpp-python-0.3.9-*.whl
 
-# Копируем остальной код
 COPY . /bot
